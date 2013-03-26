@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- build.xml, for Ant to compile and run the Nim Game example, Wainer -->
+<project basedir="." default="compile">
+	<property name="build.dir" value="build" />
+	<property name="src.dir" value="src" />
+	<property name="dist.dir" value="dist" />
+	<property name="build.compiler" value="modern" />
+
+	<target description="Creates temporary directories" name="init">
+		<mkdir dir="${build.dir}/classes" />
+		<mkdir dir="${dist.dir}" />
+	</target>
+
+	<target depends="init" description="Removes temporary directories" name="clean">
+		<delete dir="${build.dir}" />
+		<delete dir="${dist.dir}" failonerror="false" />
+	</target>
+
+	<target name="compile" depends="init">
+		<javac debug="true" deprecation="true" fork="true"
+			destdir="${build.dir}/classes"
+			srcdir="${src.dir}"  verbose="true"
+			excludes="**/*Test*"
+			source="1.6" target="1.6" >
+		</javac>
+	</target>
+
+	<target name="run" depends="compile" description="Run the Application">
+		<java classname="nim.GuiNim" failonerror="true" fork="true">
+			<classpath>
+				<pathelement location="${build.dir}/classes" />
+				<pathelement location="${build.dir}/.." />
+			</classpath>
+		</java>
+	</target>
+
+	<target name="archive" depends="compile" description="Creates a distribution jar file">
+		<jar casesensitive="false" destfile="${dist.dir}/GuiNim.jar">
+			<fileset dir="${build.dir}/classes">
+				<include name="**/*.class" />
+				<exclude name="**/*Test*" />
+			</fileset>
+			<fileset dir=".">
+				<include name="images/*" />
+				<include name="sounds/*" />
+			</fileset>
+			<manifest>
+				<attribute name="Main-Class" value="nim.GuiNim" />
+			</manifest>
+		</jar>
+		<echo>To run this application from the command line without Ant, try:</echo>
+		<property location="${dist.dir}/GuiNim.jar" name="dist.jar.resolved"/>
+		<echo>java -jar "${dist.jar.resolved}"</echo>
+	</target>
+
+	<target name="runJar" depends="archive" description="Run the jarred Application">
+		<java failonerror="true" fork="true" jar= "${dist.dir}/GuiNim.jar" />
+	</target>
+
+</project>
